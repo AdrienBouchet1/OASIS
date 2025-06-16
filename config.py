@@ -46,6 +46,7 @@ def add_all_arguments(parser, train):
     parser.add_argument('--EMA_decay', type=float, default=0.9999, help='decay in exponential moving averages')
     parser.add_argument('--no_3dnoise', action='store_true', default=False, help='if specified, do *not* concatenate noise to label maps')
     parser.add_argument('--z_dim', type=int, default=64, help="dimension of the latent z vector")
+    parser.add_argument('--output_channel', type=int, default=1, help="channel of generated images")
 
     if train:
         parser.add_argument('--freq_print', type=int, default=1000, help='frequency of showing training results')

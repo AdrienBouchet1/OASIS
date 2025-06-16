@@ -10,11 +10,13 @@ class OASIS_Generator(nn.Module):
         self.opt = opt
         sp_norm = norms.get_spectral_norm(opt)
         ch = opt.channels_G
+        output_channel=opt.output_channel
         self.channels = [16*ch, 16*ch, 16*ch, 8*ch, 4*ch, 2*ch, 1*ch]
         self.init_W, self.init_H = self.compute_latent_vector_size(opt)
-        self.conv_img = nn.Conv2d(self.channels[-1], 3, 3, padding=1)
+        self.conv_img = nn.Conv2d(self.channels[-1], output_channel, 3, padding=1)
         self.up = nn.Upsample(scale_factor=2)
         self.body = nn.ModuleList([])
+        
         for i in range(len(self.channels)-1):
             self.body.append(ResnetBlock_with_SPADE(self.channels[i], self.channels[i+1], opt))
         if not self.opt.no_3dnoise:

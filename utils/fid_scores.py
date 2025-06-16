@@ -40,6 +40,10 @@ class fid_pytorch():
         with torch.no_grad():
             for i, data_i in enumerate(self.val_dataloader):
                 image = data_i["image"]
+                # convert to 3 channels if grayscale
+                if image.shape[1] == 1:
+                    image = image.repeat(1, 3, 1, 1)  # (B, 1, H, W) → (B, 3, H, W)
+
                 if self.opt.gpu_ids != "-1":
                     image = image.cuda()
                 image = (image + 1) / 2

@@ -75,12 +75,14 @@ class OASIS_model(nn.Module):
     def load_checkpoints(self):
         if self.opt.phase == "test":
             which_iter = self.opt.ckpt_iter
+            
             path = os.path.join(self.opt.checkpoints_dir, self.opt.name, "models", str(which_iter) + "_")
             if self.opt.no_EMA:
                 self.netG.load_state_dict(torch.load(path + "G.pth"))
             else:
                 self.netEMA.load_state_dict(torch.load(path + "EMA.pth"))
         elif self.opt.continue_train:
+            print("ls chkpoint",os.listdir("./checkpoints/oasis_EM/models/"))
             which_iter = self.opt.which_iter
             path = os.path.join(self.opt.checkpoints_dir, self.opt.name, "models", str(which_iter) + "_")
             self.netG.load_state_dict(torch.load(path + "G.pth"))
