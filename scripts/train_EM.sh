@@ -1,0 +1,1 @@
+python /home/adrienb/Documents/Adrien/Code/OASIS/train.py --name oasis_EM --dataset_mode EM --gpu_ids 0 --dataroot "/home/adrienb/Documents/Adrien/datasets/ContextGan_dataset/d2/raw/" --batch_size 4   2>&1 | tee "/home/adrienb/Documents/Adrien/datasets/ContextGan_dataset/d2/train.log"
