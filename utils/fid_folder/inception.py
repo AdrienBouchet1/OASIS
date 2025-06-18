@@ -124,6 +124,7 @@ class InceptionV3(nn.Module):
             self.blocks.append(nn.Sequential(*block3))
 
         for param in self.parameters():
+            
             param.requires_grad = requires_grad
 
     def forward(self, inp):
@@ -141,6 +142,14 @@ class InceptionV3(nn.Module):
         block, sorted ascending by index
         """
         outp = []
+        if inp.shape[1]==1 : 
+
+            inp = torch.concat((inp,)*3, dim=1)
+           # print("passage en RGB : ok !!!")    
+        elif inp.shape[1]==3 : 
+            pass
+        else : 
+            raise Exception("problème de dimentions sur Inception et les tenseurs en début de forward")
         x = inp
 
         if self.resize_input:
