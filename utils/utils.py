@@ -6,6 +6,8 @@ import os
 import models.models as models
 import matplotlib.pyplot as plt
 from PIL import Image
+import pandas as pd 
+import seaborn as sns 
 
 
 def fix_seed(seed):
@@ -22,6 +24,97 @@ def get_start_iters(start_iter, dataset_size):
     start_iter  = (start_iter + 1) %  dataset_size
     return start_epoch, start_iter
 
+
+
+#-----------------------------------------------------------------------------------#
+
+
+def grad_saving(opt,dictionary : dict) -> None:
+
+
+    """ 
+    Attentend un dictionnaire du type 
+        { "layer 1" : grad_val1, 
+           "layer_2": grad_val2}
+    
+    """
+    if not os.path.exists(os.path.join(opt.checkpoints_dir,opt.name,"gradflow")) : 
+        os.makedirs(os.path.join(opt.checkpoints_dir,opt.name,"gradflow"))
+
+    grad_xsl_path=os.path.join(opt.checkpoints_dir,opt.name,"gradflow","grads.csv")
+    
+    df=pd.DataFrame([dictionary])
+    
+
+    if  os.path.exists(grad_xsl_path):
+        previous_df=pd.read_csv(grad_xsl_path)
+        df["iter"]=previous_df.shape[0]+1
+        df=pd.concat([previous_df,df])
+    else: 
+        df["iter"]=0
+    print("max :",df.iloc[df.shape[0]-1].max())
+
+    fig_norm,fig_raw=plot_grad(df)
+    fig_norm.savefig(os.path.join(opt.checkpoints_dir,opt.name,"gradflow","grads_norm.pdf"),dpi=1000)
+    fig_raw.savefig(os.path.join(opt.checkpoints_dir,opt.name,"gradflow","grads_raw.pdf"),dpi=1000)
+    plt.close("all")
+    df.to_csv(grad_xsl_path,sep=",",index=False)
+
+
+def plot_grad(df : pd.DataFrame)-> None : 
+
+
+
+    cols_to_normalize = [col for col in df.columns if col != "iter"]
+
+    dataframe_norm = df.copy()
+    dataframe_raw=df.copy()
+    dataframe_norm[cols_to_normalize] = dataframe_norm[cols_to_normalize].div(dataframe_norm[cols_to_normalize].iloc[0])
+    dataframe_norm=dataframe_norm[cols_to_normalize].iloc[:,:]
+    
+    
+    dataframe_raw=dataframe_raw[cols_to_normalize].iloc[:,:]
+  
+      
+    dataframe_norm.replace({np.inf: 100000000, -np.inf: -100000000}, inplace=True)
+    dataframe_raw.replace({np.inf: 100000000, -np.inf: -100000000}, inplace=True)
+    
+        
+    # Remplacer les zéros ou négatifs avant log
+    dataframe_norm = dataframe_norm.clip(lower=1e-10)
+    dataframe_raw = dataframe_raw.clip(lower=1e-10)
+
+    df_log_norm = np.log10(dataframe_norm)
+    
+    raw=np.log10(dataframe_raw)
+    norm=df_log_norm
+
+
+    fig_norm, ax = plt.subplots(figsize=(10, 6))
+
+    cmap = sns.color_palette("viridis", as_cmap=True)
+    cmap.set_bad(color='black')
+    sns.heatmap( norm.T, cmap=cmap, cbar=True, linewidths=0.5, linecolor='gray', ax=ax)
+
+
+    plt.xlabel("Iteration")
+    plt.ylabel("Layer")
+    plt.title("Gradient norm per layer over iterations (log scale)")
+    plt.tight_layout()
+
+    fig_raw, ax = plt.subplots(figsize=(10, 6))
+
+    cmap = sns.color_palette("viridis", as_cmap=True)
+    cmap.set_bad(color='black')
+    sns.heatmap(raw.T, cmap=cmap, cbar=True, linewidths=0.5, linecolor='gray', ax=ax)
+
+
+    plt.xlabel("Iteration")
+    plt.ylabel("Layer")
+    plt.title("Gradient raw per layer over iterations (log scale)")
+    plt.tight_layout()
+
+    return fig_norm,fig_raw
 
 class results_saver():
     def __init__(self, opt):

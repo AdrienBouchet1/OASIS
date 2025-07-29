@@ -51,6 +51,10 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer)
         loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
         loss_D.backward()
+
+
+        if opt.add_gradient_report and cur_iter%opt.freq_gradient_report==0: 
+                utils.grad_saving(opt,model.module.get_gradients())
         optimizerD.step()
         
         #--- stats update ---#

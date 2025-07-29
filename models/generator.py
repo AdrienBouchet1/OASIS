@@ -49,6 +49,20 @@ class OASIS_Generator(nn.Module):
         x = F.tanh(x)
         return x
 
+    
+# --------------------------------------------------------------------------------- #
+
+    def get_gradients(self): 
+
+        dic={name:param.grad.norm().item() for name,param in self.named_parameters() if param.grad is not None }
+        for key,val in dic.items() : 
+
+            # if val==np.inf : 
+            if val > 10000 : 
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!  Gradient infini sur la couche : {}".format(key))     
+        return dic 
+
+
 
 class ResnetBlock_with_SPADE(nn.Module):
     def __init__(self, fin, fout, opt):
@@ -72,7 +86,7 @@ class ResnetBlock_with_SPADE(nn.Module):
             self.norm_s = norms.SPADE(opt, fin, spade_conditional_input_dims)
         self.activ = nn.LeakyReLU(0.2, inplace=True)
 
-    def forward(self, x, seg):
+    def forward(self, x, seg):   
         if self.learned_shortcut:
             x_s = self.conv_s(self.norm_s(x, seg))
         else:

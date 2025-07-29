@@ -123,6 +123,21 @@ class OASIS_model(nn.Module):
             networks = [self.netG]
         for net in networks:
             net.apply(init_weights)
+        
+    
+
+    
+    def get_gradients(self): 
+
+        if self.opt.phase == "train" : 
+
+            dic_G={"Generator_{}".format(key):val for key,val in self.netG.get_gradients().items()}
+            dic_D={"discriminator_{}".format(key):val for key,val in self.netD.get_gradients().items()}
+            dic_total=dic_G|dic_D
+            return dic_total
+        else: 
+            raise Exception("Aucun intérêt")
+     
 
 
 def put_on_multi_gpus(model, opt):

@@ -38,6 +38,19 @@ class OASIS_Discriminator(nn.Module):
         return ans
 
 
+# --------------------------------------------------------------------------------- #
+
+ 
+    def get_gradients(self): 
+
+        dic={name:param.grad.norm().item() for name,param in self.named_parameters() if param.grad is not None }
+      
+        return dic
+    
+
+         
+
+
 class residual_block_D(nn.Module):
     def __init__(self, fin, fout, opt, up_or_down, first=False):
         super().__init__()
